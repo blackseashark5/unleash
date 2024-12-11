@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1E2A3B;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #2A3B4F;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .status-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-item h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .status-item p {
+            font-size: 16px;
+        }
+
+        .graph {
+            margin-top: 20px;
+            height: 150px;
+            background-color: #324A67;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .circle-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 150px;
+            height: 150px;
+            background: conic-gradient(#00D664 0%, #2A3B4F 75%);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .circle-progress::after {
+            content: "75%";
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .robot-list {
+            margin-top: 30px;
+        }
+
+        .robot-list ul {
+            list-style: none;
+        }
+
+        .robot-list li {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #3A4E68;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .robot-list .robot-details {
+            display: flex;
+            align-items: center;
+        }
+
+        .robot-list .robot-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .robot-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .robot-actions button {
+            padding: 10px 15px;
+            background-color: #4F698A;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .robot-actions button:hover {
+            background-color: #3B5874;
+        }
+
+        .overview {
+            background-color: #324A67;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .overview h2 {
+            font-size: 22px;
+        }
+
+        .overview span {
+            font-size: 18px;
+            display: block;
+            margin-top: 5px;
+            color: #B5B5B5;
+        }
+
+        #map {
+            margin-top: 30px;
+            height: 200px;
+            background-color: #324A67;
+            border-radius: 8px;
+        }
+
+        canvas {
+            background-color: #324A67;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h2 {
+                font-size: 20px;
+            }
+
+            .circle-progress {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h2>Robots Overview</h2>
+            </div>
+            <div class="status-box">
+                <div class="status-item">
+                    <h3>123</h3>
+                    <p>Robots Online</p>
+                </div>
+                <div class="status-item">
+                    <h3>90</h3>
+                    <p>Working</p>
+                </div>
+                <div class="status-item">
+                    <h3>30</h3>
+                    <p>Ready to Work</p>
+                </div>
+            </div>
+            <div class="graph">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="header">
+                <h2>Robot Control</h2>
+            </div>
+            <div class="circle-progress"></div>
+            <div class="robot-list">
+                <ul>
+                    <li>
+                        <div class="robot-details">
+                            <img class="robot-img" src="https://via.placeholder.com/50" alt="Robot">
+                            <div class="robot-info">
+                                <p>Robot 1 - Cleaning</p>
+                            </div>
+                        </div>
+                        <div class="robot-actions">
+                            <button>Start</button>
+                            <button>Stop</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="robot-details">
+                            <img class="robot-img" src="https://via.placeholder.com/50" alt="Robot">
+                            <div class="robot-info">
+                                <p>Robot 2 - Idle</p>
+                            </div>
+                        </div>
+                        <div class="robot-actions">
+                            <button>Start</button>
+                            <button>Stop</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="overview">
+                <h2>Global Fleet Activity</h2>
+                <span>Summary of robot deployments</span>
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        // Bar Chart
+        var ctx = document.getElementById('barChart').getContext('2d');
+        var barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Robot 1', 'Robot 2', 'Robot 3', 'Robot 4'],
+                datasets: [{
+                    label: 'Task Progress (%)',
+                    data: [80, 60, 75, 90],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Leaflet Map
+        var map = L.map('map').setView([13.0827, 80.2707], 13); // Chennai coordinates
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([13.0827, 80.2707]).addTo(map)
+            .bindPopup('Chennai, India.')
+            .openPopup();
+    </script>
+</body>
+</html>
